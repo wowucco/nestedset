@@ -174,7 +174,7 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 		for _, n := range s.nodes {
 
 			if n.GetRight() > right && n.GetRight() <= rightNear {
-				n.SetRight(n.Right() - skewTree)
+				n.SetRight(n.GetRight() - skewTree)
 			}
 
 			if n.GetLeft() > right && n.GetLeft() <= rightNear {
