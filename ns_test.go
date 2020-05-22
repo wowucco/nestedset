@@ -17,15 +17,17 @@ var (
 
 func createTestNestedSet(t *testing.T) {
 
-	ns = NewNestedSet()
+	ns = NewNestedSet(&Node{})
 
 	nodes = make([]NodeInterface, 0)
 
 	nodes = append(nodes, ns.rootNode)
 
 	for i := 1; i <= 6; i++ {
-		n := NewNode()
-		n.NodeName = fmt.Sprintf("node %d", i)
+		n := &Node{
+			NodeName: fmt.Sprintf("node %d", i),
+		}
+
 		nodes = append(nodes, n)
 	}
 
