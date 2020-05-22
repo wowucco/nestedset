@@ -13,7 +13,7 @@ type SortedNodes []NodeInterface
 
 func (sn SortedNodes) Len() int           { return len(sn) }
 func (sn SortedNodes) Swap(i, j int)      { sn[i], sn[j] = sn[j], sn[i] }
-func (sn SortedNodes) Less(i, j int) bool { return sn[i].Left() < sn[j].Left() }
+func (sn SortedNodes) Less(i, j int) bool { return sn[i].GetLeft() < sn[j].GetLeft() }
 
 // NestedSet represents a nested set management type.
 type NestedSet struct {
@@ -58,8 +58,8 @@ func (s *NestedSet) Add(newNode, parent NodeInterface) error {
 		parent = s.rootNode
 	}
 
-	level := parent.Level() + 1
-	right := parent.Right()
+	level := parent.GetLevel() + 1
+	right := parent.GetRight()
 
 	newNode.SetLevel(level)
 	s.maxId++
@@ -69,10 +69,10 @@ func (s *NestedSet) Add(newNode, parent NodeInterface) error {
 
 	for _, n := range s.nodes {
 
-		if n.Right() >= right {
-			n.SetRight(n.Right() + 2)
-			if n.Left() > right {
-				n.SetLeft(n.Left() + 2)
+		if n.GetRight() >= right {
+			n.SetRight(n.GetRight() + 2)
+			if n.GetLeft() > right {
+				n.SetLeft(n.GetLeft() + 2)
 			}
 		}
 	}
@@ -100,14 +100,14 @@ func (s *NestedSet) Delete(node NodeInterface) error {
 
 	for _, n := range s.nodes {
 
-		if n.Left() < node.Left() || n.Right() > node.Right() {
+		if n.GetLeft() < node.GetLeft() || n.GetRight() > node.GetRight() {
 
-			if n.Right() > node.Right() {
-				n.SetRight(n.Right() - (node.Right() - node.Left() + 1))
+			if n.GetRight() > node.GetRight() {
+				n.SetRight(n.GetRight() - (node.GetRight() - node.GetLeft() + 1))
 			}
 
-			if n.Left() > node.Left() {
-				n.SetLeft(n.Left() - (node.Right() - node.Left() + 1))
+			if n.GetLeft() > node.GetLeft() {
+				n.SetLeft(n.GetLeft() - (node.GetRight() - node.GetLeft() + 1))
 			}
 
 			newNodes = append(newNodes, n)
@@ -126,7 +126,7 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if node.Level() == 0 {
+	if node.GetLevel() == 0 {
 		return errors.New("Can't move root node")
 	}
 
@@ -134,7 +134,7 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 		parent = s.rootNode
 	}
 
-	if parent.Left() >= node.Left() && parent.Right() <= node.Right() {
+	if parent.GetLeft() >= node.GetLeft() && parent.GetRight() <= node.GetRight() {
 		return errors.New("Can't move branch to node within itself")
 	}
 
@@ -146,11 +146,11 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 		return errors.New("Moving in same branch not implemented")
 	}
 
-	level := node.Level()
-	left := node.Left()
-	right := node.Right()
-	levelUp := parent.Level()
-	rightNear := parent.Right() - 1
+	level := node.GetLevel()
+	left := node.GetLeft()
+	right := node.GetRight()
+	levelUp := parent.GetLevel()
+	rightNear := parent.GetRight() - 1
 	skewLevel := levelUp - level + 1
 	skewTree := right - left + 1
 	skewEdit := rightNear - left + 1
@@ -161,11 +161,11 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 	if isUp {
 		for _, n := range s.nodes {
 
-			if n.Right() < left && n.Right() > rightNear {
-				n.SetRight(n.Right() + skewTree)
+			if n.GetRight() < left && n.GetRight() > rightNear {
+				n.SetRight(n.GetRight() + skewTree)
 			}
-			if n.Left() < left && n.Left() > rightNear {
-				n.SetLeft(n.Left() + skewTree)
+			if n.GetLeft() < left && n.GetLeft() > rightNear {
+				n.SetLeft(n.GetLeft() + skewTree)
 			}
 		}
 	} else {
@@ -173,20 +173,20 @@ func (s *NestedSet) Move(node, parent NodeInterface) error {
 
 		for _, n := range s.nodes {
 
-			if n.Right() > right && n.Right() <= rightNear {
+			if n.GetRight() > right && n.GetRight() <= rightNear {
 				n.SetRight(n.Right() - skewTree)
 			}
 
-			if n.Left() > right && n.Left() <= rightNear {
-				n.SetLeft(n.Left() - skewTree)
+			if n.GetLeft() > right && n.GetLeft() <= rightNear {
+				n.SetLeft(n.GetLeft() - skewTree)
 			}
 		}
 	}
 
 	for _, n := range toUpdate {
-		n.SetLeft(n.Left() + skewEdit)
-		n.SetRight(n.Right() + skewEdit)
-		n.SetLevel(n.Level() + skewLevel)
+		n.SetLeft(n.GetLeft() + skewEdit)
+		n.SetRight(n.GetRight() + skewEdit)
+		n.SetLevel(n.GetLevel() + skewLevel)
 	}
 
 	return nil
@@ -204,7 +204,7 @@ func (s *NestedSet) Parent(node NodeInterface) NodeInterface {
 func (s *NestedSet) parent(node NodeInterface) NodeInterface {
 
 	for _, n := range s.nodes {
-		if n.Left() <= node.Left() && n.Right() >= node.Right() && n.Level() == (node.Level()-1) {
+		if n.GetLeft() <= node.GetLeft() && n.GetRight() >= node.GetRight() && n.GetLevel() == (node.GetLevel()-1) {
 			return n
 		}
 	}
@@ -219,7 +219,7 @@ func (s *NestedSet) FindById(id int64) NodeInterface {
 	defer s.mutex.Unlock()
 
 	for _, n := range s.nodes {
-		if n.Id() == id {
+		if n.GetId() == id {
 			return n
 		}
 	}
@@ -256,7 +256,7 @@ func (s *NestedSet) branch(node NodeInterface) []NodeInterface {
 	res = make([]NodeInterface, 0)
 
 	for _, n := range s.nodes {
-		if n.Left() >= node.Left() && n.Right() <= node.Right() {
+		if n.GetLeft() >= node.GetLeft() && n.GetRight() <= node.GetRight() {
 			res = append(res, n)
 		}
 	}

@@ -7,12 +7,12 @@ package nestedset
 
 // NodeInterface is the interface implemented by types that can be used by nodes in nested set
 type NodeInterface interface {
-	Id() int64    // Returns id of node
-	Name() string // Returns name of node
+	GetId() int64    // Returns id of node
+	GetName() string // Returns name of node
 
-	Level() int64 // Returns level of node
-	Left() int64  // Returns left of node
-	Right() int64 // Returns right of node
+	GetLevel() int64 // Returns level of node
+	GetLeft() int64  // Returns left of node
+	GetRight() int64 // Returns right of node
 
 	SetLevel(int64)   // Sets node level
 	SetLeft(int64)    // Sets node left
@@ -28,24 +28,24 @@ type Node struct {
 	NodeRight int64    `json:"right"`
 }
 
-func (n Node) Id() int64 {
+func (n Node) GetId() int64 {
 	return n.NodeId
 }
 
-func (n Node) Name() string {
+func (n Node) GetName() string {
 	return n.NodeName
 }
 
-func (n Node) Level() int64 {
+func (n Node) GetLevel() int64 {
 
 	return n.NodeLevel
 }
 
-func (n Node) Left() int64 {
+func (n Node) GetLeft() int64 {
 	return n.NodeLeft
 }
 
-func (n Node) Right() int64 {
+func (n Node) GetRight() int64 {
 	return n.NodeRight
 }
 
