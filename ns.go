@@ -26,7 +26,7 @@ type NestedSet struct {
 // NewNestedSet creates and returns a new instance of NestedSet with root node.
 func NewNestedSet(rootNode NodeInterface) *NestedSet {
 
-	rootNode.SetRight(1)
+	rootNode.SetRight(rootNode.GetLeft() + 1)
 
 	s := NestedSet{
 		nodes:    make([]NodeInterface, 0),
